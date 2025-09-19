@@ -12,7 +12,7 @@ Undo/Redo Sounds (With Keybinds!)
 
 Note: Some sounds are grouped due to blender limitations
 
-Just download the zip file and drag into blender
+Just download the zip file and drag into blender (or download the py file in the sources)
 
 This was heavily vibecoded so please submit any issues you may find.
 
