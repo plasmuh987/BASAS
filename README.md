@@ -7,7 +7,8 @@ This suite currently includes
 Selction Sounds
 Spawning/Duplication Sounds
 Deletion Sounds
-Rotation/Move/Scale/Transfomrm Sounds
+Rotation/Move/Scale/Transform Sounds
+Undo/Redo Sounds (With Keybinds!)
 
 Note: Generalized due to blender limitations (Also couldnt do real ui 😔)
 
