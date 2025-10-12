@@ -9,7 +9,8 @@ This suite currently includes
 <li>Rotation/Move/Scale/Transform</li>
 <li>Undo/Redo (With Keybinds!)</li>
 </ul>
-<h3>Note: Some sounds are grouped due to blender limitations</h3>
+
+Sound Overlapping is a issue that im unsure of how to fix
 
 Just download the zip file and drag into blender (or download the py file in the sources)
 
