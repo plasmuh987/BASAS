@@ -1,11 +1,10 @@
-
 bl_info = {
     "name": "Undo/Redo Sound",
-    "author": "Plasmuh987", #Microsoft Copilot Assisted
-    "version": (1, 1),
+    "author": "Plasmuh987",
+    "version": (1, 3),
     "blender": (2, 80, 0),
     "location": "Preferences > Add-ons",
-    "description": "Plays a sound when undoing or redoing an action with customizable keybindings",
+    "description": "Plays a sound when undoing or redoing an action",
     "category": "System"
 }
 
@@ -14,11 +13,12 @@ import aud
 import os
 
 sound_device = aud.Device()
+undo_sound_handle = None
+redo_sound_handle = None
 keymaps = []
 
 class UndoRedoSoundPreferences(bpy.types.AddonPreferences):
     bl_idname = __name__
-
     sound_undo: bpy.props.StringProperty(name="Undo Sound", subtype='FILE_PATH')
     volume_undo: bpy.props.FloatProperty(name="Undo Volume", min=0.0, max=2.0, default=1.0)
     key_undo: bpy.props.EnumProperty(name="Undo Key", items=[(k, k, "") for k in ['Z','U','Y','X']])
@@ -55,14 +55,19 @@ class PlayUndoSoundOperator(bpy.types.Operator):
     bl_label = "Play Undo Sound"
 
     def execute(self, context):
+        global undo_sound_handle
         if bpy.ops.ed.undo.poll():
             bpy.ops.ed.undo()
             prefs = context.preferences.addons[__name__].preferences
-            if os.path.exists(prefs.sound_undo):
+            if prefs.sound_undo and os.path.exists(prefs.sound_undo):
                 try:
+                    if undo_sound_handle and undo_sound_handle.status:
+                        print("Stopping previous undo sound.")
+                        undo_sound_handle.stop()
+                    print(f"UndoRedoSound: Playing undo sound: {prefs.sound_undo}")
                     sound = aud.Sound(prefs.sound_undo)
-                    handle = sound_device.play(sound)
-                    handle.volume = prefs.volume_undo
+                    undo_sound_handle = sound_device.play(sound)
+                    undo_sound_handle.volume = prefs.volume_undo
                 except Exception as e:
                     self.report({'WARNING'}, f"Undo sound error: {e}")
         else:
@@ -74,14 +79,19 @@ class PlayRedoSoundOperator(bpy.types.Operator):
     bl_label = "Play Redo Sound"
 
     def execute(self, context):
+        global redo_sound_handle
         if bpy.ops.ed.redo.poll():
             bpy.ops.ed.redo()
             prefs = context.preferences.addons[__name__].preferences
-            if os.path.exists(prefs.sound_redo):
+            if prefs.sound_redo and os.path.exists(prefs.sound_redo):
                 try:
+                    if redo_sound_handle and redo_sound_handle.status:
+                        print("Stopping previous redo sound.")
+                        redo_sound_handle.stop()
+                    print(f"UndoRedoSound: Playing redo sound: {prefs.sound_redo}")
                     sound = aud.Sound(prefs.sound_redo)
-                    handle = sound_device.play(sound)
-                    handle.volume = prefs.volume_redo
+                    redo_sound_handle = sound_device.play(sound)
+                    redo_sound_handle.volume = prefs.volume_redo
                 except Exception as e:
                     self.report({'WARNING'}, f"Redo sound error: {e}")
         else:
@@ -93,7 +103,6 @@ classes = [UndoRedoSoundPreferences, PlayUndoSoundOperator, PlayRedoSoundOperato
 def register():
     for cls in classes:
         bpy.utils.register_class(cls)
-
     prefs = bpy.context.preferences.addons.get(__name__)
     if prefs:
         prefs = prefs.preferences
@@ -108,13 +117,9 @@ def register():
 def unregister():
     for cls in classes:
         bpy.utils.unregister_class(cls)
-
     wm = bpy.context.window_manager
     kc = wm.keyconfigs.addon
     if kc:
         for km in keymaps:
             kc.keymaps.remove(km)
         keymaps.clear()
-
-if __name__ == "__main__":
-    register()
